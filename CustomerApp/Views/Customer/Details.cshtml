@@ -1,0 +1,113 @@
+﻿@model CustomerApp.Domain.Models.Customer
+
+@{
+    ViewData["Title"] = "Customer Invoices";
+    var invoices = Model.Invoices?.ToList() ?? new List<CustomerApp.Domain.Models.Invoice>();
+    var selectedInvoice = invoices.FirstOrDefault(); // Default selected invoice
+}
+
+<h2>Invoices for @Model.Name</h2>
+<p><strong>Address:</strong> @Model.Address1, @Model.City, @Model.State</p>
+
+<hr />
+
+<div class="row">
+    <!-- LEFT PANEL – Invoice List -->
+    <div class="col-md-6">
+        <h4>Invoices</h4>
+
+        <table class="table table-bordered">
+            <thead class="table-dark">
+                <tr>
+                    <th>#</th>
+                    <th>Due Date</th>
+                    <th>Amount Paid</th>
+                    <th>Payment Term</th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (var invoice in invoices)
+                {
+                    <tr class="@(invoice.Id == selectedInvoice?.Id ? "table-primary" : "")">
+                        <td>@invoice.Id</td>
+                        <td>@invoice.DueDate.ToShortDateString()</td>
+                        <td>$@invoice.AmountPaid</td>
+                        <td>@invoice.PaymentTerms?.Label</td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+
+        <!-- Add New Invoice Form -->
+        <form asp-action="AddInvoice" method="post">
+            @Html.AntiForgeryToken()
+            <input type="hidden" name="CustomerId" value="@Model.Id" />
+
+            <div class="mb-2">
+                <label>Date</label>
+                <input type="date" name="Date" class="form-control" required />
+            </div>
+
+            <div class="mb-2">
+                <label>Payment Terms</label>
+                <select name="PaymentTermsId" class="form-control" required>
+                    <option value="">-- Select Terms --</option>
+                    @foreach (var term in ViewBag.PaymentTerms as List<CustomerApp.Domain.Models.PaymentTerms>)
+                    {
+                        <option value="@term.Id">@term.Label</option>
+                    }
+                </select>
+            </div>
+
+            <button type="submit" class="btn btn-success btn-sm">➕ Add Invoice</button>
+        </form>
+    </div>
+
+    <!-- RIGHT PANEL – Line Items -->
+    <div class="col-md-6">
+        @if (selectedInvoice != null)
+        {
+            <h4>Invoice #@selectedInvoice.Id – Line Items</h4>
+            <p><strong>Total:</strong> $@selectedInvoice.LineItems?.Sum(li => li.Amount)</p>
+
+            <table class="table table-bordered">
+                <thead>
+                    <tr>
+                        <th>Description</th>
+                        <th>Amount</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var item in selectedInvoice.LineItems)
+                    {
+                        <tr>
+                            <td>@item.Description</td>
+                            <td>$@item.Amount</td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+
+            <!-- Add New Line Item -->
+            <form asp-action="AddLineItem" method="post">
+                @Html.AntiForgeryToken()
+                <input type="hidden" name="InvoiceId" value="@selectedInvoice.Id" />
+
+                <div class="mb-2">
+                    <label>Description</label>
+                    <input name="Description" class="form-control" required />
+                </div>
+                <div class="mb-2">
+                    <label>Amount</label>
+                    <input name="Amount" type="number" step="0.01" class="form-control" required />
+                </div>
+
+                <button type="submit" class="btn btn-primary btn-sm">➕ Add Line Item</button>
+            </form>
+        }
+        else
+        {
+            <p>No invoices found for this customer.</p>
+        }
+    </div>
+</div>

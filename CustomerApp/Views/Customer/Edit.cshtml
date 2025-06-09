@@ -1,0 +1,20 @@
+﻿@model CustomerApp.Domain.Models.Customer
+@{
+    ViewData["Title"] = "Edit Customer";
+}
+
+<h2>Edit Customer – @Model.Name</h2>
+
+<form asp-action="Edit" method="post">
+    @Html.AntiForgeryToken()
+    @Html.HiddenFor(model => model.Id)
+
+    @Html.Partial("_CustomerFormPartial", Model)
+
+    <button type="submit" class="btn btn-primary">💾 Save Changes</button>
+    <a asp-action="Index" class="btn btn-secondary">Cancel</a>
+</form>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+}

@@ -1,0 +1,18 @@
+﻿@model CustomerApp.Domain.Models.Customer
+@{
+    ViewData["Title"] = "Add Customer";
+}
+
+<h2>Add Customer</h2>
+
+<form asp-action="Add" method="post">
+    @Html.Partial("_CustomerFormPartial", Model)
+    @Html.AntiForgeryToken()
+
+    <button type="submit" class="btn btn-success">➕ Add Customer</button>
+    <a asp-action="Index" class="btn btn-secondary">Cancel</a>
+</form>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+}

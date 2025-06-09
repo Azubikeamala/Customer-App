@@ -1,0 +1,64 @@
+﻿@model List<CustomerApp.Domain.Models.Customer>
+
+@{
+    ViewData["Title"] = "Customers";
+    string currentGroup = ViewBag.CurrentGroup as string ?? "A-E";
+    int? undoId = ViewBag.LastDeletedId as int?;
+}
+
+<h2>Customers – Group @currentGroup</h2>
+
+<!-- Group Filter Buttons -->
+<div class="mb-3">
+    @{
+        var groups = new[] { "A-E", "F-J", "K-O", "P-T", "U-Z" };
+    }
+    @foreach (var group in groups)
+    {
+        <a asp-action="Index" asp-route-group="@group"
+           class="btn @(currentGroup == group ? "btn-primary" : "btn-outline-primary") m-1">
+            @group
+        </a>
+    }
+</div>
+
+<!-- Add Customer Button -->
+<div class="mb-3">
+    <a asp-action="Add" asp-route-group="@currentGroup" class="btn btn-success">➕ Add New Customer</a>
+</div>
+
+<!-- Undo Delete Banner -->
+@if (undoId.HasValue)
+{
+    <div class="alert alert-warning alert-dismissible fade show" role="alert">
+        Customer deleted. <a asp-action="Undo" asp-route-id="@undoId" class="alert-link">Undo</a>
+        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+    </div>
+}
+
+<!-- Customer Table -->
+<table class="table table-bordered table-striped">
+    <thead class="table-dark">
+        <tr>
+            <th>Name</th>
+            <th>Address</th>
+            <th>Actions</th>
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (var customer in Model)
+        {
+            <tr>
+                <td>@customer.Name</td>
+                <td>@customer.Address1, @customer.City, @customer.State</td>
+                <td>
+                    <a asp-action="Details" asp-route-id="@customer.Id" asp-route-group="@currentGroup" class="btn btn-info btn-sm">📄 Invoices</a>
+                    <a asp-action="Edit" asp-route-id="@customer.Id" asp-route-group="@currentGroup" class="btn btn-warning btn-sm">✏️ Edit</a>
+                    <a asp-action="Delete" asp-route-id="@customer.Id" asp-route-group="@currentGroup"
+                       onclick="return confirm('Are you sure you want to delete this customer?');"
+                       class="btn btn-danger btn-sm">🗑 Delete</a>
+                </td>
+            </tr>
+        }
+    </tbody>
+</table>
